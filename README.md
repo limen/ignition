@@ -1,4 +1,4 @@
-# Ignitor
+# Ignition
 
 Ignite your passion to build a golang web application.
 
@@ -16,7 +16,7 @@ Ignite your passion to build a golang web application.
 
 ## Examples
 
-[examples](https://github.com/limen/ignitor/tree/master/examples)
+[examples](https://github.com/limen/ignition/tree/master/examples)
 
 
 ## Inspired by

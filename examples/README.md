@@ -2,7 +2,7 @@
 
 ## Configuration
 
-See [.env.yml](https://github.com/limen/ignitor/blob/master/examples/.env.yml)
+See [.env.yml](https://github.com/limen/ignition/blob/master/examples/.env.yml)
 . Modify it according to your environment.
 
 ```
@@ -66,4 +66,4 @@ $ curl http://localhost:8765/config?getters=locale,tz
 
 ## Develop
 
-see [main.go](https://github.com/limen/ignitor/blob/master/examples/main.go)
+see [main.go](https://github.com/limen/ignition/blob/master/examples/main.go)
