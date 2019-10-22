@@ -5,9 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/limen/ignitor"
-	"github.com/limen/ignitor/middlewares"
-	"github.com/limen/ignitor/validation"
+	"github.com/limen/ignition"
+	"github.com/limen/ignition/middlewares"
+	"github.com/limen/ignition/validation"
 	"strings"
 )
 
@@ -20,7 +20,7 @@ type configParamBag struct{}
 // - validation rules
 // - validation errors (if any)
 type UserPostEntity struct {
-	ignitor.RequestEntity
+	ignition.RequestEntity
 }
 
 // user post data structure
@@ -34,7 +34,7 @@ type UserData struct {
 // username - varchar
 // password - varchar
 type UserModelEntity struct {
-	ignitor.ModelEntity
+	ignition.ModelEntity
 	ID       uint   `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -42,7 +42,7 @@ type UserModelEntity struct {
 
 // user CRUD functions container
 type UserModel struct {
-	ignitor.Model
+	ignition.Model
 }
 
 // environment configuration
@@ -57,10 +57,10 @@ type config struct {
 }
 
 // postgres connection pool
-var pgPool = &ignitor.Pool{
+var pgPool = &ignition.Pool{
 	MaxActive: 10,
 	MaxIdle:   1,
-	Dial: func() (ignitor.Conn, error) {
+	Dial: func() (ignition.Conn, error) {
 		dsn := fmt.Sprintf(
 			"host=%s port=%d user=%s dbname=%s password=%s sslmode=%s",
 			conf.DbHost,
@@ -80,14 +80,14 @@ var pgPool = &ignitor.Pool{
 }
 
 var conf config
-var confLoader ignitor.Config
+var confLoader ignition.Config
 
 // getters
 var TzGetter = tzGetter{}
 var LocaleGetter = localeGetter{}
 
 // getter map
-var getterMap = map[string]ignitor.Getter{
+var getterMap = map[string]ignition.Getter{
 	"tz":     TzGetter,
 	"locale": LocaleGetter,
 }
@@ -179,7 +179,7 @@ func main() {
 		user, err := NewUserModel().Find(ctx.Query("username"))
 		data["user"] = user
 		data["error"] = err
-		ignitor.Response.Success(ctx, data)
+		ignition.Response.Success(ctx, data)
 	})
 	// create user
 	r.POST("/users", func(ctx *gin.Context) {
@@ -190,14 +190,14 @@ func main() {
 		// if there're errors
 		// response with error code
 		if entity.HaveErrors() {
-			ignitor.Response.Error(ctx, "ParamError", "Param validation failed", entity.Errors)
+			ignition.Response.Error(ctx, "ParamError", "Param validation failed", entity.Errors)
 		} else {
 			userData := entity.Data.(UserData)
 			_, err := NewUserModel().Create(userData.Username, userData.Password)
 			if err != nil {
-				ignitor.Response.Error(ctx, "DatabaseError", "Create user error:"+err.Error(), nil)
+				ignition.Response.Error(ctx, "DatabaseError", "Create user error:"+err.Error(), nil)
 			} else {
-				ignitor.Response.Success(ctx, map[string]interface{}{"username": userData.Username})
+				ignition.Response.Success(ctx, map[string]interface{}{"username": userData.Username})
 			}
 		}
 	})
@@ -217,7 +217,7 @@ func main() {
 			data[getter] = getterMap[getter].Get(confParamBag, getters)
 		}
 
-		ignitor.Response.Success(ctx, data)
+		ignition.Response.Success(ctx, data)
 	})
 	// see formatted panic in stdout
 	r.GET("/panic", func(ctx *gin.Context) {

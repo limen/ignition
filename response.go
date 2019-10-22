@@ -1,4 +1,4 @@
-package ignitor
+package ignition
 
 import (
 	"encoding/json"

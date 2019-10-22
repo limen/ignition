@@ -1,4 +1,4 @@
-package ignitor
+package ignition
 
 type Getter interface {
 	// Since getters may be related with each other,

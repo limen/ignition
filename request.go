@@ -1,7 +1,7 @@
-package ignitor
+package ignition
 
 import (
-	"github.com/limen/ignitor/validation"
+	"github.com/limen/ignition/validation"
 	"reflect"
 )
 

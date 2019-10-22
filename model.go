@@ -1,4 +1,4 @@
-package ignitor
+package ignition
 
 // Model holds CRUD functions
 type Model struct{}
