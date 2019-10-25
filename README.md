@@ -9,6 +9,7 @@ Ignite your passion to build a golang web application.
 - Introduce **getter**s to enable clients to get what they need
 - Easier validation and regulation
 - Configuration with YAML file
+- Authorization with token
 
 ## Requirements
 

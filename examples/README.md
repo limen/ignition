@@ -40,6 +40,16 @@ $ go run main.go
 ## Send requests
 
 ```
+$ curl -H "X-Auth-Token:admin" -H "X-Auth-Username:admin" http://localhost:8765/config\?getters\=tz
+{"code":"AuthError","data":null,"msg":"error","status":"SUCCESS"}
+```
+
+```
+$ curl -H "X-Auth-Token:admin123456" -H "X-Auth-Username:admin" http://localhost:8765/config\?getters\=tz
+{"code":"SUCCESS","data":{"tz":"Asia/Shanghai"},"msg":"success","status":"SUCCESS"}
+```
+
+```
 $ curl --data "username=1_&password=123" http://localhost:8765/users
 {"code":"ParamError","data":{"password":["password should contains at least 6 characters"],"username":["username should contains 3-30 characters","shouldn't contain '_'"]},"msg":"error","status":"SUCCESS"}
 ```

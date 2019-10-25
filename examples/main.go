@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/limen/ignition"
+	"github.com/limen/ignition/auth"
 	"github.com/limen/ignition/middlewares"
 	"github.com/limen/ignition/validation"
 	"strings"
@@ -54,6 +55,21 @@ type config struct {
 	DbPort     int    `yml:"dbport"`
 	DbUser     string `yml:"dbuser"`
 	DbPassword string `yml:"dbpassword"`
+}
+
+// implements AuthProviderInterface
+type AuthProvider struct{}
+
+type AuthCredential struct {
+	Token string
+}
+
+// implements UserProviderInterface
+type UserProvider struct{}
+
+// implements UserInterface
+type MyUser struct {
+	User UserModelEntity
 }
 
 // postgres connection pool
@@ -164,14 +180,70 @@ func (localeGetter) Get(ctx interface{}, allGetters map[string]bool) interface{}
 	return conf.Locale
 }
 
+func (user MyUser) GetUsername() interface{} {
+	return user.User.Username
+}
+
+func (user MyUser) GetPassword() string {
+	return user.User.Password
+}
+
+func (ap AuthProvider) GetContextUsername(ctx *gin.Context) interface{} {
+	return ctx.GetHeader("X-Auth-Username")
+}
+
+func (ap AuthProvider) GetContextCredential(ctx *gin.Context) interface{} {
+	credit := AuthCredential{}
+	credit.Token = ctx.GetHeader("X-Auth-Token")
+
+	return credit
+}
+
+func (ap AuthProvider) Auth(username interface{}, credential interface{}) (bool, error) {
+	credit := credential.(AuthCredential)
+	// for test only
+	return credit.Token == username.(string)+"123456", nil
+}
+
+// for test only
+func (ap AuthProvider) Create(username interface{}, credential interface{}) error {
+	return nil
+}
+
+func (UserProvider) Create(user auth.UserInterface) error {
+	return nil
+}
+
+func (UserProvider) FindByUsername(username interface{}) auth.UserInterface {
+	return MyUser{
+		User: UserModelEntity{
+			Username: username.(string),
+			Password: username.(string) + "123456",
+		},
+	}
+}
+
+func (UserProvider) ValidatePassword(username interface{}, password string) (bool, error) {
+	return password == username.(string)+"123456", nil
+}
+
 func main() {
 	r := gin.New()
 	// load yaml configuration file
 	confLoader.Load(".env.yml", &conf)
+	authHandler := middlewares.AuthHandler{}
+	authHandler.AuthProvider = AuthProvider{}
+	authHandler.AbortFunc = func(ctx *gin.Context, err error) {
+		ctx.Abort()
+		ignition.Response.Error(ctx, "AuthError", "", nil)
+	}
 
-	// use middleware
+	// middleware for access log
 	r.Use(middlewares.AccessLogHandler())
+	// middleware for panic log
 	r.Use(middlewares.PanicLogger())
+	// middleware for token authorization
+	r.Use(authHandler.NewHandler())
 
 	// get user info
 	r.GET("/user-info", func(ctx *gin.Context) {
